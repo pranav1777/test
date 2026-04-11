@@ -10,7 +10,7 @@ public class TestController {
 
     @GetMapping("/greet")
     public String greet() {
-        return "Hello Brother";
+        return "Hello Devops";
     }
 
 }

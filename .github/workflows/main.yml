@@ -1,33 +1,50 @@
-name:  ci cd for the test Application
+name: CI CD for the test Application
 
 on:
-    push:
-        branches: ["main"]
+  push:
+    branches: ["main"]
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-        steps:
-            - uses: actions/checkout@v3
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-            - uses: actions/setup-java@v3
-              with:
-                distribution: 'temurin'
-                java-version: '17'
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
-            - run: mvn clean install
-              working-directory: test
+      - name: Build Project
+        run: mvn clean install
+        working-directory: test
 
-            - name: Build Docker Image
-              run: docker build -t test .
-              working-directory: test
+      - name: Build Docker Image
+        run: docker build -t test .
+        working-directory: test
 
-            - name: Login to Docker Hub
-              run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+    
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
 
-            - name: Tag Docker Image
-              run: docker tag test ${{ secrets.DOCKER_USERNAME }}/test:latest
+      
+      - name: Scan Docker Image
+        run: trivy image --exit-code 1 --severity HIGH,CRITICAL test
 
-            - name: Push Docker Image
-              run: docker push ${{ secrets.DOCKER_USERNAME }}/test:latest
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Tag Docker Image
+        run: docker tag test ${{ secrets.DOCKER_USERNAME }}/test:latest
+
+      - name: Push Docker Image
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/test:latest

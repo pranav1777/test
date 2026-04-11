@@ -20,13 +20,13 @@ jobs:
               working-directory: test
 
             - name: Build Docker Image
-              run: docker build -t my-app .
+              run: docker build -t test .
 
             - name: Login to Docker Hub
               run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
             - name: Tag Docker Image
-              run: docker tag my-app ${{ secrets.DOCKER_USERNAME }}/test:latest
+              run: docker tag test ${{ secrets.DOCKER_USERNAME }}/test:latest
 
             - name: Push Docker Image
               run: docker push ${{ secrets.DOCKER_USERNAME }}/test:latest

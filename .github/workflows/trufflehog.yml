@@ -1,0 +1,14 @@
+name: Truffle hog scan for the security leaks
+on:
+ push:
+   branches: ['main']
+
+jobs:
+  truggle-hog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+    
+      - name: Truggle hog security checks
+        uses: trufflesecurity/trufflehog@main
+   

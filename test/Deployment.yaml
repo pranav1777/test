@@ -16,4 +16,4 @@ spec:
         - name: test
           image: pranavdaha3/test:latest
           ports:
-            - containerPort: 8080
+            - containerPort: 8080 
